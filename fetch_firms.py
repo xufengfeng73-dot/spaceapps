@@ -27,9 +27,12 @@ API = "https://firms.modaps.eosdis.nasa.gov/api/area/csv/{key}/{product}/{region
 
 # MODIS Collection 6.1 and VIIRS 375m (Suomi-NPP). NOAA-20 available as
 # VIIRS_NOAA20_NRT via --products if you want a third stream.
-DEFAULT_PRODUCTS = ["MODIS_C6_1", "VIIRS_SNPP_NRT"]
+# Current FIRMS area-API product names (verified 2026-10-20).
+# MODIS_C6_1 is retired ("Invalid source"); use MODIS_NRT.
+DEFAULT_PRODUCTS = ["MODIS_NRT", "VIIRS_SNPP_NRT"]
 
-SENSOR_OF = {"MODIS_C6_1": "MODIS", "VIIRS_SNPP_NRT": "VIIRS", "VIIRS_NOAA20_NRT": "VIIRS"}
+SENSOR_OF = {"MODIS_NRT": "MODIS", "VIIRS_SNPP_NRT": "VIIRS",
+             "VIIRS_NOAA20_NRT": "VIIRS", "VIIRS_NOAA21_NRT": "VIIRS"}
 
 
 def download(map_key: str, product: str, region: str, days: int) -> Path:

@@ -14,7 +14,8 @@ This is a STARTING POINT, not the final model. It does:
 
 Usage:
     python calibrate.py                      # uses data/sample_fires.csv
-    python calibrate.py --input data/firms_MODIS_C6_1_world_1d.csv
+    python calibrate.py --input data/firms_MODIS_NRT_*.csv data/firms_VIIRS_SNPP_NRT_*.csv
+                                             # one or more files are merged
 """
 import argparse
 import math
@@ -106,16 +107,21 @@ def compare_frp(pairs: pd.DataFrame) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="MODIS/VIIRS cross-calibration scaffold")
-    ap.add_argument("--input", default=str(SAMPLE))
+    ap.add_argument("--input", nargs="+", default=[str(SAMPLE)],
+                    help="one or more FIRMS CSVs (merged automatically)")
     ap.add_argument("--spatial-tol-km", type=float, default=1.0)
     ap.add_argument("--time-tol-hours", type=float, default=12.0)
     args = ap.parse_args()
 
-    df = load_fires(Path(args.input))
+    frames = []
+    for pth in args.input:
+        frames.append(load_fires(Path(pth)))
+    df = pd.concat(frames, ignore_index=True)
+    src = ", ".join(args.input)
     n_modis = (df.sensor == "MODIS").sum()
     n_viirs = (df.sensor == "VIIRS").sum()
     print(f"[calibrate] loaded {len(df)} detections "
-          f"({n_modis} MODIS, {n_viirs} VIIRS) from {args.input}")
+          f"({n_modis} MODIS, {n_viirs} VIIRS) from {src}")
 
     pairs = match_hotspots(df, args.spatial_tol_km, args.time_tol_hours)
     stats = compare_frp(pairs)
